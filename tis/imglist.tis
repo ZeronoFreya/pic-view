@@ -1,0 +1,128 @@
+class ImgList: Behavior {
+    var _this;
+    var (ulw, liw, column) = 0;
+    var xPos = {};
+    function attached() {
+        this.borderSpacing = (this.style#border-spacing).toFloat(#px);
+        this.baseW = 270;
+        this << event set-img (evt) {
+            return this.setImg();
+        }
+
+        _this = this;
+        var path = "d:/project/GitHub/Tumblr5/imgTemp";
+        var list = this.eachPic(path);
+        this.getColumn();
+        var containH = this.box(#height, #border, #view);
+        var d;
+        var (serial, minColumn) = 0;
+        for(var i=0; i<list.length;i++){
+            d = list.shift();
+            this.$append(<li><img src="{path}/{d}"></li>);
+            // var img = new Image(path+"/"+list[i]);
+            // var img = this.loadImage( path+"/"+list[i] );
+            // stdout.println(img.height);
+            (serial, minColumn) = aaa( this.$(li:last-child), serial, minColumn, this.borderSpacing );
+            if (containH < minColumn) {
+                break;
+            }
+        }
+        // this.$$(li).style#width = px(liw);
+        stdout.println("rrr");
+        // this.on("size",this.myOnSize);
+        // this.onSize = this.myOnSize();
+    }
+    function aaa(el, serial, minColumn, borderSpacing){
+        el.style#width = px(liw);
+        var h = el.box(#height, #border, #view).toInteger();
+        el.style.set {
+            top:px( xPos[serial]["b"] ),
+            left:px( xPos[serial]["l"] )
+        };
+        xPos[serial]["b"] += h + borderSpacing;
+        minColumn = xPos[serial]["b"];
+        for (var i=0;i<column;i++) {
+            if( minColumn > xPos[i]["b"] ){
+                minColumn = xPos[i]["b"];
+                serial = i;
+            }
+        }
+        return (serial, minColumn);
+    }
+    function eachPic(path){
+        var l = [];
+        function w(name, flag) {
+            if (flag == 0){
+                // el.$append(<li><img src="{path}/{name}"></li>);
+                l.push(name);
+            }
+            return true;
+        }
+        System.scanFiles(path+"/*.*", w);
+        return l;
+    }
+    function onSize(){
+        // ulw = this.box(#width, #border, #view);
+        // if (this.ulwCopy == ulw) return;
+
+        // this.ulwCopy = ulw;
+
+        // column = Math.floor( ulw / this.baseW.toFloat() + 0.5 ).toInteger();
+        // return this.setImg();
+        return this.getColumn();
+    }
+    function getColumn(){
+        ulw = this.box(#width, #border, #view);
+        if (this.ulwCopy == ulw) return;
+        this.ulwCopy = ulw;
+        column = Math.floor( ulw / this.baseW.toFloat() + 0.5 ).toInteger();
+        liw = Math.floor( (ulw+this.borderSpacing)/column-this.borderSpacing ).toInteger();
+        stdout.println(column,liw);
+        for (var i=0;i<column;i++) {
+            xPos[i] = {
+                "l": i*(liw+this.borderSpacing),
+                "b": 0
+            };
+        }
+    }
+    function setImg(){
+        // ulw = this.box(#width, #border, #view);
+        // if (this.ulwCopy == ulw) return;
+
+        // this.ulwCopy = ulw;
+
+        // column = Math.floor( ulw / this.baseW.toFloat() + 0.5 ).toInteger();
+
+        // liw = px( (ulw - ( 320*column + this.borderSpacing*(column-1) ))/column + 320 );
+        liw = Math.floor( (ulw+this.borderSpacing)/column-this.borderSpacing );
+        // liw = liw < this.baseW ? this.baseW : liw;
+        var l = 0;
+        for (var i=0;i<column;i++) {
+            xPos[i] = {
+                "l": i*(liw+this.borderSpacing),
+                "b": 0
+            };
+        }
+        var h = 0;
+        var serial = 0;
+        var minColumn = 0;
+        for ( var el in this.$$(li) ) {
+            h = Math.random(10)*100+50;
+            // h = this.box(#height, #border, #view).toInteger();
+            el.style.set {
+                width:px( liw ),
+                height:px( h ),
+                top:px( xPos[serial]["b"] ),
+                left:px( xPos[serial]["l"] )
+            };
+            xPos[serial]["b"] += h + this.borderSpacing;
+            minColumn = xPos[serial]["b"];
+            for (var i=0;i<column;i++) {
+                if( minColumn > xPos[i]["b"] ){
+                    minColumn = xPos[i]["b"];
+                    serial = i;
+                }
+            }
+        }
+    }
+}

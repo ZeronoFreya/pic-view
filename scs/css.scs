@@ -1,0 +1,27 @@
+@import "common.scs";
+#pic-view{
+    prototype:ImgList url(../tis/imglist.tis);
+    /*size: 300dip;*/
+    width: *;
+    height: *;
+    border-spacing: 10dip;
+    overflow: hidden;
+    /*flow: horizontal-wrap;*/
+    /*background: red;*/
+    position: relative;
+}
+li{
+    width: 50px;
+    background: gold;
+    position: absolute;
+    overflow: hidden;
+    top: 0;
+    left: 0;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: cover;
+    /*background: url(../num.jpg) no-repeat top left;*/
+}
+li img{
+    width: *;
+}
