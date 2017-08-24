@@ -5,6 +5,10 @@ class ImgList: Behavior {
     function attached() {
         this.borderSpacing = (this.style#border-spacing).toFloat(#px);
         this.baseW = 270;
+        this.minColumn = 0;
+        var (w,h) = this.box(#dimension, #border, #view);
+        this.width = w;
+        this.height = h;
         this << event set-img (evt) {
             return this.setImg();
         }
@@ -13,9 +17,10 @@ class ImgList: Behavior {
         var path = "d:/project/GitHub/Tumblr5/imgTemp";
         var list = this.eachPic(path);
         this.getColumn();
-        var containH = this.box(#height, #border, #view);
+        // var containH = this.box(#height, #border, #view);
         var d;
         var (serial, minColumn) = 0;
+        var j=0;
         for(var i=0; i<list.length;i++){
             d = list.shift();
             this.$append(<li><img src="{path}/{d}"></li>);
@@ -23,14 +28,50 @@ class ImgList: Behavior {
             // var img = this.loadImage( path+"/"+list[i] );
             // stdout.println(img.height);
             (serial, minColumn) = aaa( this.$(li:last-child), serial, minColumn, this.borderSpacing );
-            if (containH < minColumn) {
+            if (this.height < minColumn) {
+                if (j<column) {
+                    j++;
+                    continue;
+                }
                 break;
             }
         }
+        this.minColumn = minColumn;
         // this.$$(li).style#width = px(liw);
         stdout.println("rrr");
         // this.on("size",this.myOnSize);
         // this.onSize = this.myOnSize();
+        this.subscribe(mousewheel, Event.MOUSE, Event.MOUSE_WHEEL);
+    }
+    function mousewheel(evt) {
+        if (evt.wheelDelta < 0) {
+            //下滚(滚轮向内滚动)
+            this.wheelDown();
+        } else {
+            //上滚(滚轮向外滚动)
+            this.wheelUp();
+        }
+        return true;
+    }
+    function wheelDown(){
+        stdout.println("down");
+        for ( var el in this.$$(li) ){
+            el.style#top = el.style#top.toFloat() - 30;
+        }
+        this.minColumn -= 30;
+        if (this.height > this.minColumn) {
+            stdout.println("loadmore");
+        }
+    }
+    function wheelUp(){
+        stdout.println("up");
+        for ( var el in this.$$(li) ){
+            el.style#top = el.style#top.toFloat() + 30;
+        }
+        // this.minColumn += 30;
+        // if (this.height > this.minColumn) {
+        //     stdout.println("loadmore");
+        // }
     }
     function aaa(el, serial, minColumn, borderSpacing){
         el.style#width = px(liw);
