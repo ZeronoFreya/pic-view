@@ -6,6 +6,8 @@
     height: *;
     border-spacing: 10dip;
     overflow: hidden;
+    /*overflow: scroll-indicator;*/
+    /*overflow: auto;*/
     /*flow: horizontal-wrap;*/
     /*background: red;*/
     position: relative;

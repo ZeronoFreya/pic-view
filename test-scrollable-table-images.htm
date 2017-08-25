@@ -1,0 +1,104 @@
+<html>
+  <head>
+  <title></title>
+  <style>
+
+
+    table {
+      font:system;
+      height:*; width:500px;
+      border:1px solid black;
+      flow:table-fixed;
+    }
+
+    table > tbody, table > tbody { border-spacing:0; }
+
+    table > tbody
+    {
+      overflow: scroll-indicator;
+      size:*;
+    }
+
+    table > tbody > tr {
+      behavior:form;
+    }
+
+    table > tbody > tr.highlighted {
+      background: #da9;
+    }
+
+    table > tbody > tr:hover {
+      background: #bcd;
+    }
+
+    table > tbody > tr:current {
+      background:gold;
+    }
+
+    table td:nth-child(2),
+    table th:nth-child(2) { width:*; }
+
+    table td:last-child,
+    table th:last-child { width:8em; }
+
+  </style>
+  <script type="text/tiscript">
+
+  include "tis/vlist.tis";
+
+  function self.ready() {
+
+    var records = new Array();
+
+    function eachPic(path){
+        var l = [];
+        function w(name, flag) {
+            if (flag == 0){
+                l.push(name);
+            }
+            return true;
+        }
+        System.scanFiles(path+"/*.*", w);
+        return l;
+    }
+    var path = "d:/project/GitHub/Tumblr5/imgTemp";
+    var list = eachPic(path);
+    for(var i = 0; i < list.length; ++i)
+      records[i] = {
+        index: i,
+        imageUrl: path + "/" + list[i]
+      };
+
+    var n = records.length;
+    var p = 0;
+
+    function setupItemView(recordNo, record, itemEl) {
+      itemEl.$(img).attributes["src"] = record.imageUrl; // or whatever you have there
+    }
+
+    var vlist = VirtualList {
+      container     : $(table>tbody),
+      bufferSize    : 20, // records in sliding window
+      setupItemView : setupItemView
+    };
+
+  stdout.println("1");
+    // feed it by these records
+    vlist.value = records;
+
+
+  }
+
+  </script>
+  </head>
+<body>
+
+  <table>
+    <tbody>
+      <tr><td(index)></td><td(caption)></td><td(status)></td><td><img/></td></tr>
+    </tbody>
+  </table>
+
+
+</body>
+</html>
