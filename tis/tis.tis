@@ -1,4 +1,5 @@
 ﻿include "common.tis";
+include "vlist.tis";
 self.ready = function() {
     //设置窗口居中
     // setWinToCenter();
@@ -11,8 +12,10 @@ self.ready = function() {
         view.connectToInspector($(body));
     });
     // var el = $(#pic-view);
-    // var path = "d:/project/GitHub/Tumblr5/imgTemp";
-    // var list = eachPic(path);
+    var path = "d:/project/GitHub/Tumblr5/imgTemp";
+    // var records = eachPic(path);
+    var records = [{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164129504765[1]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164130145866[1]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164130283155[1]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164130286605[1]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164130584186[1]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164130970499[1]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164131151000[1]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164131185260[1]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164131348560[1]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164131410455[1]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164131575220[1]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164131578065[1]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164131588270[1]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164131589760[1]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164131591800[1]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164131774445[1]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164132110330[1]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164132476555[1]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164132620623[1]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164132680265[1]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164133434980[1]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164133578969[1]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164133963430[1]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164134106147[1]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164134273920[1]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164134349595[1]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164134349595[2]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164134349595[3]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164134349595[4]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164134349595[5]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164134349595[6]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164134349595[7]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164134378560[1]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164134380795[1]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164134514700[1]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164134623990[1]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164134689795[1]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164134784812[1]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164134792745[1]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164134796785[1]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164134836645[1]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164135243977[1]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164135243977[2]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164135243977[3]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164135243977[4]_250.jpg"},{"imageUrl":"d:/project/GitHub/Tumblr5/imgTemp/164135243977[5]_250.jpg"}];
+    // view.clipboard(#put,JSON.stringify(records, ""));
     // for(var i=0;i<10;i++){
     //     ul.$append(<li>{i}</li>);
     // }
@@ -20,5 +23,38 @@ self.ready = function() {
     //     el.$append(<li><img src="{path}/{list[i]}"></li>);
     // }
     // ul.postEvent("set-img");
+    // var records = [];
+    // var records = new Array(100);
+    // for(var i in 100){
+    //     records[i] = {
+    //         index: i,
+    //         imageUrl:""
+    //       };
+    //   // records.push { index: i, caption:"Item" };
+    // }
+    // feed it by these records
+    function setupItemView(recordNo, record, itemEl) {
+      itemEl.$(img).attributes["src"] = record.imageUrl;
+    }
+    var vlist = VirtualList {
+      container     : $(#pic-view),
+      bufferSize    : 20,
+      setupItemView : setupItemView
+    };
+    vlist.value = records;
 }
-
+function eachPic(path){
+    var l = [];
+    function w(name, flag) {
+        if (flag == 0){
+            stdout.println(name);
+            // el.$append(<li><img src="{path}/{name}"></li>);
+            l.push({
+                imageUrl: path + "/" + name
+            });
+        }
+        return true;
+    }
+    System.scanFiles(path+"/*.*", w);
+    return l;
+}

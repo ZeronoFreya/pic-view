@@ -1,6 +1,6 @@
 @import "common.scs";
 #pic-view{
-    prototype:ImgList url(../tis/imglist.tis);
+    /*prototype:ImgList url(../tis/imglist.tis);*/
     /*size: 300dip;*/
     width: *;
     height: *;
@@ -10,9 +10,11 @@
     /*overflow: auto;*/
     /*flow: horizontal-wrap;*/
     /*background: red;*/
+    display: block;
     position: relative;
 }
 li{
+    /*behavior:form;*/
     width: 50px;
     background: gold;
     position: absolute;
