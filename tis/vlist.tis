@@ -34,9 +34,10 @@ function VirtualList(params) {
     var   setupRecord = params.setupItemView || null;  // setupItemView(index,record, itemElement)
     var   recordData = params.getItemData;
 
-    var   posUp = { top : 0, left : 0 };
-    var   posDn = { top : 0, left : 0 };
+    // var   posUp = { top : 0, left : 0 };
+    // var   posDn = { top : 0, left : 0 };
     var   img_width = 200;
+    var   list_height = list.box(#height, #border, #self).toInteger();
     var   column = {
       0 : {
         up : { top : 0, left : 0 },
@@ -51,13 +52,14 @@ function VirtualList(params) {
         dn : { top : 0, left : 420 }
       }
     };
+    var minPos = {up:0,dn:0}
     // stdout.println(template.outerHtml);
     //multiselection support (not yet)
     //var   selected = params.multiselect ? {} : null; // ATTENTION: if multiselect then each record must have unique .id field
     var   setupSetObserver;
     // stdout.println(list.length);
     function recordAt(n) {
-      stdout.println("recordAt");
+      // stdout.println("recordAt");
       var r = records[n];
       // if(!r && recordData ) {
       //   setupSetObserver(false, true);
@@ -66,22 +68,27 @@ function VirtualList(params) {
       // }
       return r;
     }
-
+    function getMinColumn(pos){
+        var column_index = 0;
+        for(var j=0; j<column.length;j++){
+          if (column[column_index][pos]["top"] > column[j][pos]["top"]) {
+              column_index = j;
+          }
+        }
+        // stdout.println("ox",column_index);
+        return column_index;
+    }
     function createRecViewer(rec) {
-      stdout.println("createRecViewer");
+      // stdout.println("createRecViewer");
       var t = cache.pop() || template.clone();
       // assert !t.state.current;
       // t.data = rec;
       return t;
     }
 
-    function setPosition( column_index, el) {
+    function setPosition( el ) {
       //决定应该添加到哪一列
-        for(var j=0; j<column.length;j++){
-          if (column[column_index]["dn"]["top"] > column[j]["dn"]["top"]) {
-              column_index = j;
-          }
-        }
+        var column_index = getMinColumn("dn");
         // stdout.println("column_index",column_index);
         el.style.set{
           width : px(img_width),
@@ -92,12 +99,13 @@ function VirtualList(params) {
         column[column_index]["dn"]["top"] += el.box(#height, #border, #self).toInteger() + 10;
     }
     function pumpAfter(i) {
-      stdout.println("pumpAfter");
+      // stdout.println("pumpAfter");
       var bso = buffer_start;
       var bsn = buffer_start = i;
       var ni = bsn + list.length;
       var niend = Integer.min(ni + BUFFER_SIZE - list.length, records.length);
-      var column_index = 0;
+      stdout.println("after",ni,niend);
+      // var column_index = 0;
       // var contain_height = 0;
       for( var i = ni; i < niend; ++i )
       {
@@ -106,7 +114,12 @@ function VirtualList(params) {
         list.append(t);
         // setupRecordObserver(rec,t);
         showRecord(i,rec,t);
-        setPosition( column_index, t)
+        setPosition( t );
+        buffer_start++;
+      }
+      minPos = {
+        up: getMinColumn("up"),
+        dn: getMinColumn("dn")
       }
     }
 
@@ -120,13 +133,47 @@ function VirtualList(params) {
     //   if( vi != visible_items )
     //     visible_items = vi;
     // }
+    function wheelUp(){
+      for ( var el in list.$$(li) ){
+        el.style#top = px( el.style#top.toFloat() + 30 );
+      }
+      for(var j=0; j<column.length;j++){
+        column[j]["up"]["top"] += 30;
+        column[j]["dn"]["top"] += 30;
+      }
+    }
+    function wheelDown(){
+      for ( var el in list.$$(li) ){
+        el.style#top = px( el.style#top.toFloat() - 30 );
+      }
+      for(var j=0; j<column.length;j++){
+        column[j]["up"]["top"] -= 30;
+        column[j]["dn"]["top"] -= 30;
+      }
+      // stdout.println("xx",list_height, column[minPos.dn]["dn"]["top"]);
+      if ( column[minPos.dn]["dn"]["top"] < list_height+100) {
+        // pumpAfter(recNo);
+      }
 
-    list.onScroll = function(evt)
-    {
-      stdout.println("4");
-      if( evt.type == Event.SCROLL_POS )
-        onScrollTo( (evt.scrollPos / item_height).limit( 0 , records.length - 1 - visible_items));
-    };
+    }
+    function mousewheel(evt) {
+        if (evt.wheelDelta < 0) {
+            //内容上移(滚轮向内滚动)
+            wheelDown();
+            // stdout.println("d");
+        } else {
+            //内容下移(滚轮向外滚动)
+            wheelUp();
+            // stdout.println("u");
+        }
+        return true;
+    }
+
+    list.onMouse = function(evt) {
+      switch(evt.type) {
+        case Event.MOUSE_WHEEL: mousewheel(evt); break;
+      }
+    }
 
     setupSetObserver = function(apply, silent = false ){
       if (apply) {
@@ -149,7 +196,7 @@ function VirtualList(params) {
     list[#value] = property(v) {
       get return records;
       set {
-        stdout.println("list.value");
+        // stdout.println("list.value");
         if ( records !== v ) {
           if (records)
             setupSetObserver(false);
@@ -168,7 +215,7 @@ function VirtualList(params) {
 
     if(!showRecord) showRecord = function(i,r,el)
     {
-      stdout.println("showRecord");
+      // stdout.println("showRecord");
       // el.value = r; // each item has behavior form so its value is an aggregate
       // el.state.current = current_record === r;
       if(setupRecord) setupRecord(i,r,el);
