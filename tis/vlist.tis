@@ -53,6 +53,7 @@ function VirtualList(params) {
       }
     };
     var minPos = {up:0,dn:0}
+    function dogc() { gc(); }
     // stdout.println(template.outerHtml);
     //multiselection support (not yet)
     //var   selected = params.multiselect ? {} : null; // ATTENTION: if multiselect then each record must have unique .id field
@@ -100,10 +101,10 @@ function VirtualList(params) {
     }
     function pumpAfter(i) {
       // stdout.println("pumpAfter");
-      var bso = buffer_start;
-      var bsn = buffer_start = i;
-      var ni = bsn + list.length;
-      var niend = Integer.min(ni + BUFFER_SIZE - list.length, records.length);
+      // var bso = buffer_start;
+      // var bsn = buffer_start;
+      var ni = buffer_start;
+      var niend = Integer.min(ni+i, records.length);
       stdout.println("after",ni,niend);
       // var column_index = 0;
       // var contain_height = 0;
@@ -117,6 +118,7 @@ function VirtualList(params) {
         setPosition( t );
         buffer_start++;
       }
+      buffer_start++;
       minPos = {
         up: getMinColumn("up"),
         dn: getMinColumn("dn")
@@ -150,9 +152,21 @@ function VirtualList(params) {
         column[j]["up"]["top"] -= 30;
         column[j]["dn"]["top"] -= 30;
       }
-      // stdout.println("xx",list_height, column[minPos.dn]["dn"]["top"]);
+      stdout.println("xx",list_height, column[minPos.dn]["dn"]["top"]);
       if ( column[minPos.dn]["dn"]["top"] < list_height+100) {
         // pumpAfter(recNo);
+        var (x1,y1,x2,y2) = 0;
+        var i = 0;
+        for ( var el in list.$$(li) ){
+          (x1,y1,x2,y2) = el.box(#rect, #border, #parent);
+          if (y2 < 100) {
+            cache.push(el);
+            el.detach();
+            i++;
+          }
+        }
+        list.timer(1s,dogc);
+        pumpAfter(i);
       }
 
     }
@@ -205,7 +219,7 @@ function VirtualList(params) {
         }
         list.clear();
         if( records )
-          pumpAfter.call(list,0);
+          pumpAfter.call(list, BUFFER_SIZE);
       }
     }
 
