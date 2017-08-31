@@ -99,12 +99,45 @@ function VirtualList(params) {
         // contain_height = el.box(#height, #border, #self).toInteger();
         column[column_index]["dn"]["top"] += el.box(#height, #border, #self).toInteger() + 10;
     }
-    function pumpAfter(i) {
+    function pumpAfter() {
       // stdout.println("pumpAfter");
       // var bso = buffer_start;
-      // var bsn = buffer_start;
+      // var bsn = buffer_start = i;
+      if ( buffer_start >= records.length ) {
+        return;
+      }
+      var bsn = 0;
+       var (x1,y1,x2,y2) = 0;
+        // var i = 0;
+        var flag = 1;
+        for ( var el in list.$$(li) ){
+          stdout.println("t");
+          if (flag > column.length) {
+            break;
+          }
+          (x1,y1,x2,y2) = el.box(#rect, #border, #parent);
+          if (y2 < -100) {
+            cache.push(el);
+            el.detach();
+            bsn++;
+            flag = 1;
+          }else {
+            flag++;
+          }
+        }
+        list.timer(1s,dogc);
+
+      // if(i + BUFFER_SIZE > records.length)
+      //   i = Integer.max(0, records.length - BUFFER_SIZE + 1);
+      // var bsn = buffer_start = i;
+
+
+
+      // var ni = bsn + list.length;
       var ni = buffer_start;
-      var niend = Integer.min(ni+i, records.length);
+      var niend = Integer.min(ni + BUFFER_SIZE - list.length, records.length);
+
+      buffer_start = niend;
       stdout.println("after",ni,niend);
       // var column_index = 0;
       // var contain_height = 0;
@@ -116,9 +149,9 @@ function VirtualList(params) {
         // setupRecordObserver(rec,t);
         showRecord(i,rec,t);
         setPosition( t );
-        buffer_start++;
+        // buffer_start++;
       }
-      buffer_start++;
+      // buffer_start++;
       minPos = {
         up: getMinColumn("up"),
         dn: getMinColumn("dn")
@@ -145,6 +178,9 @@ function VirtualList(params) {
       }
     }
     function wheelDown(){
+      // if ( buffer_start >= records.length ) {
+      //   return;
+      // }
       for ( var el in list.$$(li) ){
         el.style#top = px( el.style#top.toFloat() - 30 );
       }
@@ -152,21 +188,22 @@ function VirtualList(params) {
         column[j]["up"]["top"] -= 30;
         column[j]["dn"]["top"] -= 30;
       }
-      stdout.println("xx",list_height, column[minPos.dn]["dn"]["top"]);
+      // stdout.println("xx",list_height, column[minPos.dn]["dn"]["top"]);
       if ( column[minPos.dn]["dn"]["top"] < list_height+100) {
         // pumpAfter(recNo);
-        var (x1,y1,x2,y2) = 0;
-        var i = 0;
-        for ( var el in list.$$(li) ){
-          (x1,y1,x2,y2) = el.box(#rect, #border, #parent);
-          if (y2 < 100) {
-            cache.push(el);
-            el.detach();
-            i++;
-          }
-        }
-        list.timer(1s,dogc);
-        pumpAfter(i);
+        // var (x1,y1,x2,y2) = 0;
+        // var i = 0;
+        // for ( var el in list.$$(li) ){
+        //   (x1,y1,x2,y2) = el.box(#rect, #border, #parent);
+        //   if (y2 < -100) {
+        //     cache.push(el);
+        //     el.detach();
+        //     i++;
+        //   }
+        // }
+        // list.timer(1s,dogc);
+        //传递上面超出显示区域的子元素个数
+        pumpAfter();
       }
 
     }
@@ -219,7 +256,7 @@ function VirtualList(params) {
         }
         list.clear();
         if( records )
-          pumpAfter.call(list, BUFFER_SIZE);
+          pumpAfter.call(list);
       }
     }
 
