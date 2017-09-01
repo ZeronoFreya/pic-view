@@ -158,6 +158,9 @@ function VirtualList(params) {
       }
     }
 
+    function pumpBefore() {
+      stdout.println("pumpBefore");
+    }
     // list.onSize = function()
     // {
     //   stdout.println("3");
@@ -176,11 +179,11 @@ function VirtualList(params) {
         column[j]["up"]["top"] += 30;
         column[j]["dn"]["top"] += 30;
       }
+      if ( column[minPos.dn]["up"]["top"] > -100) {
+        pumpBefore();
+      }
     }
     function wheelDown(){
-      // if ( buffer_start >= records.length ) {
-      //   return;
-      // }
       for ( var el in list.$$(li) ){
         el.style#top = px( el.style#top.toFloat() - 30 );
       }
@@ -190,19 +193,6 @@ function VirtualList(params) {
       }
       // stdout.println("xx",list_height, column[minPos.dn]["dn"]["top"]);
       if ( column[minPos.dn]["dn"]["top"] < list_height+100) {
-        // pumpAfter(recNo);
-        // var (x1,y1,x2,y2) = 0;
-        // var i = 0;
-        // for ( var el in list.$$(li) ){
-        //   (x1,y1,x2,y2) = el.box(#rect, #border, #parent);
-        //   if (y2 < -100) {
-        //     cache.push(el);
-        //     el.detach();
-        //     i++;
-        //   }
-        // }
-        // list.timer(1s,dogc);
-        //传递上面超出显示区域的子元素个数
         pumpAfter();
       }
 
