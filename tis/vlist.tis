@@ -21,7 +21,7 @@
 function VirtualList(params) {
     const list = params.container; assert list;
     const BUFFER_SIZE = params.bufferSize || 100; // sliding buffer size, number of DOM elements in the view
-
+    const offset = 100;
     var   records = null;
     var   template = list.first;
     var   item_height = 10;   // will be adjusted later
@@ -41,15 +41,18 @@ function VirtualList(params) {
     var   column = {
       0 : {
         up : { top : 0, left : 0 },
-        dn : { top : 0, left : 0 }
+        dn : { top : 0, left : 0 },
+        last:0
       },
       1 : {
         up : { top : 0, left : 210 },
-        dn : { top : 0, left : 210 }
+        dn : { top : 0, left : 210 },
+        last:0
       },
       2 : {
         up : { top : 0, left : 420 },
-        dn : { top : 0, left : 420 }
+        dn : { top : 0, left : 420 },
+        last:0
       }
     };
     var minPos = {up:0,dn:0}
@@ -90,14 +93,31 @@ function VirtualList(params) {
     function setPosition( el ) {
       //决定应该添加到哪一列
         var column_index = getMinColumn("dn");
+        var idx = column[column_index]["last"];
         // stdout.println("column_index",column_index);
+        el.@#column = column_index;
+        el.@#idx = idx;
+        el.$(span).text = "column: "+column_index+" idx: "+idx;
         el.style.set{
           width : px(img_width),
           top   : px(column[column_index]["dn"]["top"]),
           left  : px(column[column_index]["dn"]["left"])
         }
+        column[column_index]["last"] += 1;
         // contain_height = el.box(#height, #border, #self).toInteger();
         column[column_index]["dn"]["top"] += el.box(#height, #border, #self).toInteger() + 10;
+    }
+    function setPosition2( el ) {
+      //决定应该添加到哪一列
+        var column_index = getMinColumn("up");
+        // stdout.println("column_index",column_index);
+        el.style.set{
+          width : px(img_width),
+          top   : px(column[column_index]["up"]["top"]),
+          left  : px(column[column_index]["up"]["left"])
+        }
+        // contain_height = el.box(#height, #border, #self).toInteger();
+        column[column_index]["up"]["top"] -= el.box(#height, #border, #self).toInteger() + 10;
     }
     function pumpAfter() {
       // stdout.println("pumpAfter");
@@ -106,7 +126,7 @@ function VirtualList(params) {
       if ( buffer_start >= records.length ) {
         return;
       }
-      var bsn = 0;
+      // var bsn = 0;
        var (x1,y1,x2,y2) = 0;
         // var i = 0;
         var flag = 1;
@@ -116,10 +136,10 @@ function VirtualList(params) {
             break;
           }
           (x1,y1,x2,y2) = el.box(#rect, #border, #parent);
-          if (y2 < -100) {
+          if (y2 < - offset) {
             cache.push(el);
             el.detach();
-            bsn++;
+            // bsn++;
             flag = 1;
           }else {
             flag++;
@@ -160,6 +180,50 @@ function VirtualList(params) {
 
     function pumpBefore() {
       stdout.println("pumpBefore");
+      return;
+      if ( buffer_start < 0 ) {
+        return;
+      }
+      var bsn = 0;
+      var (x1,y1,x2,y2) = 0;
+      // var i = 0;
+      // var flag = 1;
+      for ( var el in list.$$(li) ){
+        stdout.println("t");
+        // if (flag > column.length) {
+        //   break;
+        // }
+        (x1,y1,x2,y2) = el.box(#rect, #border, #parent);
+        if (y1 > list_height + offset) {
+          cache.push(el);
+          el.detach();
+          bsn++;
+          // flag = 1;
+        }else {
+          // flag++;
+        }
+      }
+      list.timer(1s,dogc);
+
+      var ni = Integer.max(buffer_start - 2*BUFFER_SIZE + list.length, 0);
+      var niend = ni + BUFFER_SIZE - list.length;
+
+      buffer_start = niend + list.length;
+      stdout.println("before",ni,niend);
+      for( var i = ni; i < niend; ++i )
+      {
+        var rec = recordAt(i);
+        var t = createRecViewer(rec);
+        list.prepend(t);
+        // setupRecordObserver(rec,t);
+        showRecord(i,rec,t);
+        setPosition2( t );
+        // buffer_start++;
+      }
+      minPos = {
+        up: getMinColumn("up"),
+        dn: getMinColumn("dn")
+      }
     }
     // list.onSize = function()
     // {
@@ -179,7 +243,9 @@ function VirtualList(params) {
         column[j]["up"]["top"] += 30;
         column[j]["dn"]["top"] += 30;
       }
-      if ( column[minPos.dn]["up"]["top"] > -100) {
+      stdout.println("up",minPos.up,column[minPos.up]["up"]["top"]);
+      // stdout.println( JSON.stringify(column, "  "));
+      if ( column[minPos.up]["up"]["top"] > -1*offset) {
         pumpBefore();
       }
     }
@@ -191,8 +257,10 @@ function VirtualList(params) {
         column[j]["up"]["top"] -= 30;
         column[j]["dn"]["top"] -= 30;
       }
+      // stdout.println("dn",minPos.dn,column[minPos.dn]["dn"]["top"]);
       // stdout.println("xx",list_height, column[minPos.dn]["dn"]["top"]);
-      if ( column[minPos.dn]["dn"]["top"] < list_height+100) {
+      // stdout.println("dn",column[minPos.dn]["up"]["top"]);
+      if ( column[minPos.dn]["dn"]["top"] < list_height + offset) {
         pumpAfter();
       }
 
